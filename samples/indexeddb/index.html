@@ -22,7 +22,9 @@
                 <div class="col-sm">
                     <p v-bind:class="{'text-success':canIUseIndexedDB,'text-danger':!canIUseIndexedDB}">
                         IndexedDB: {{canIUseIndexedDB?"Available":"Unavailable"}}</p>
-                    <p>Quota: {{calcStorageSize(storageEstimate.usage)}} / {{calcStorageSize(storageEstimate.quota)}}
+                    <p>Quota: {{calcStorageSize(storageEstimate.usage)}} /
+                        {{calcStorageSize(storageEstimate.quota)}}
+                        <button class="btn btn-info btn-sm" @click="loadEstimate">Refresh</button>
                     </p>
                     <div><button class="btn btn-primary btn-sm" @click="importData">Import Data</button></div>
                 </div>
@@ -44,30 +46,12 @@
                         <table class="table table-striped table-dark">
                             <thead>
                                 <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">First</th>
-                                    <th scope="col">Last</th>
-                                    <th scope="col">Handle</th>
+                                    <th v-for="col in columns" scope="col">{{col}}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <th scope="row">1</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">2</th>
-                                    <td>Jacob</td>
-                                    <td>Thornton</td>
-                                    <td>@fat</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">3</th>
-                                    <td>Larry</td>
-                                    <td>the Bird</td>
-                                    <td>@twitter</td>
+                                <tr v-for="item in data">
+                                    <th v-for="col in columns" scope="row">{{item[col]}}</th>
                                 </tr>
                             </tbody>
                         </table>

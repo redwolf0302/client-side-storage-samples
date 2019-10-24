@@ -13,12 +13,11 @@ var vm = new Vue({
   el: "#app",
   data: {
     canIUseIndexedDB: canIUseIndexedDB(),
-    // databases: [],
     objectStoreNames: null,
     currentObjectStoreName: null,
     currentDatabase: null,
-    createDatabaseModel: {},
-    createObjectStore: {},
+    columns: [],
+    data: [],
     hasError: false,
     errorMessage: null,
     hasWarn: false,
@@ -39,16 +38,21 @@ var vm = new Vue({
         console.log("open success");
         db = event.target.result;
         // 设置Database事件
+
+        // 监听数据库事务abort事件
         db.addEventListener("abort", event => {
           console.log("db transaction aborted", event);
         });
+        // 监听数据库close事件
         db.addEventListener("close", event => {
           console.log("db closed", event);
         });
+        // 监听数据库error事件
         db.addEventListener("error", event => {
           console.error("db error", event);
           this.showError(event.target.error.message);
         });
+        // 监听数据库版本变化事件
         db.addEventListener("versionchange", event => {
           // 当有两个网页打开数据库连接时候会出现
           console.log(
@@ -63,7 +67,7 @@ var vm = new Vue({
         this.objectStoreNames = db.objectStoreNames;
         this.clearError();
         this.clearWarn();
-        loadEstimate();
+        this.loadEstimate();
       };
       // 监听数据库升级事件，只在首次打开数据库或者版本号递增以后触发的事件
       // 在这个事件中，可以创建或删除ObjectStore，创建或删除Index
@@ -108,17 +112,24 @@ var vm = new Vue({
     loadObjectStore(osName) {
       if (db) {
         let transaction = db.transaction(osName, "readonly");
-        transaction.oncomplete = function(event) {
+        transaction.oncomplete = event => {
           console.log(event);
         };
-        transaction.onerror = function(event) {
+        transaction.onerror = event => {
           console.error(event);
         };
         let objectStore = transaction.objectStore(osName);
-        let request = objectStore.count();
-        request.onsuccess = function(event) {
-          console.log(event.target.result);
+        console.log(objectStore);
+        let request = objectStore.getAll();
+        request.onsuccess = event => {
+          const data = event.target.result;
+          if (data && data.length > 0) {
+            this.columns = Object.keys(data[0]);
+            this.data = data;
+          }
         };
+        request.onerror = event => {};
+        transaction.commit();
       }
     },
     calcStorageSize(size) {
@@ -142,20 +153,19 @@ var vm = new Vue({
           console.log("transaction error", event);
           this.showError(event.target.error.message);
         };
-        let os = transaction.objectStore("patient");
+        let objectStore = transaction.objectStore("patient");
         patients.forEach(patient => {
-          os.add(patient);
+          objectStore.add(patient);
         });
         transaction.commit();
+      }
+    },
+    loadEstimate() {
+      if (navigator.storage) {
+        navigator.storage.estimate().then(se => {
+          this.storageEstimate = { usage: se.usage, quota: se.quota };
+        });
       }
     }
   }
 });
-
-function loadEstimate() {
-  if (navigator.storage) {
-    navigator.storage.estimate().then(se => {
-      vm.$data.storageEstimate = { usage: se.usage, quota: se.quota };
-    });
-  }
-}
