@@ -1,0 +1,71 @@
+<html lang="zh">
+
+<head>
+    <title>IndexedDB Samples</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../styles/bootstrap.min.css" />
+</head>
+
+<body>
+    <div id="app">
+        <div class="container-fluid px-lg-5">
+            <h1 class="text-center">IndexedDB Samples</h1>
+            <div v-if="hasError" class="alert alert-danger" role="alert">
+                {{errorMessage}}
+            </div>
+            <div v-if="hasWarn" class="alert alert-warning" role="alert">
+                {{warnMessage}}
+            </div>
+            <div class="row mx-lg-n5">
+                <div class="col-sm">
+                    <p v-bind:class="{'text-success':canIUseIndexedDB,'text-danger':!canIUseIndexedDB}">
+                        IndexedDB: {{canIUseIndexedDB?"Available":"Unavailable"}}</p>
+                    <p>Quota: {{calcStorageSize(storageEstimate.usage)}} /
+                        {{calcStorageSize(storageEstimate.quota)}}
+                        <button class="btn btn-info btn-sm" @click="loadEstimate">Refresh</button>
+                    </p>
+                    <div><button class="btn btn-primary btn-sm" @click="importData">Import Data</button></div>
+                </div>
+            </div>
+            <div class="row mx-lg-n5">
+                <div class="col-4">
+                    <h4 v-if="currentDatabase">Database:{{currentDatabase.name}}(V{{currentDatabase.version}})</h4>
+                    <h5>Object Stores</h5>
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action"
+                            v-bind:class="{'active':currentObjectStoreName===objectStoreName}"
+                            v-for="objectStoreName in objectStoreNames"
+                            @click="selectObjectStore(objectStoreName)">{{objectStoreName}}</a>
+                    </div>
+                </div>
+                <div class="col-8">
+                    <h4>Object Store: {{currentObjectStoreName}}</h4>
+                    <button class="btn btn-success btn-sm" @click="searchFemaleAndLessThan80">查询80岁以下的女性</button>
+                    <button class="btn btn-success btn-sm" @click="searchLessThan80">查询80岁以下患者</button>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-dark">
+                            <thead>
+                                <tr>
+                                    <th v-for="col in columns" scope="col">{{col}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in data">
+                                    <th v-for="col in columns" scope="row">{{item[col]}}</th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../scripts/dexie.js"></script>
+    <script src="../scripts/vue.js"></script>
+    <script src="./scripts/data.js"></script>
+    <script src="./scripts/main.js"></script>
+</body>
+
+</html>
