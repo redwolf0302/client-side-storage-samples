@@ -1,0 +1,29 @@
+{
+  "name": "client-side-storage-samples",
+  "version": "1.0.0",
+  "description": "Client-Side storage samples",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redwolf0302/client-side-storage-samples.git"
+  },
+  "keywords": [
+    "storage",
+    "indexeddb",
+    "webstorage"
+  ],
+  "author": "EvanZhang <redwolf0302@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/redwolf0302/client-side-storage-samples/issues"
+  },
+  "homepage": "https://github.com/redwolf0302/client-side-storage-samples#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jest": "^24.9.0"
+  }
+}
