@@ -7,7 +7,7 @@ const MB = 1024 * 1024;
 const GB = 1024 * 1024 * 1024;
 
 const DATABASE_NAME = "cs-storage-demo";
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 let db = null;
 var vm = new Vue({
   el: "#app",
@@ -78,8 +78,15 @@ var vm = new Vue({
         if (!db.objectStoreNames.contains("patient")) {
           // 创建ObjectStore，设置ObjectStore名称和options{keyPath}
           let os = db.createObjectStore("patient", { keyPath: "patientId" });
-          os.createIndex("index_by_age_and_gender", ["age", "gender"]);
+          os.createIndex("index_by_age_and_gender", ["age", "gender"], {
+            unique: false,
+            multiEntry: false
+          });
+          os.createIndex("index_by_age", "age", { unique: false });
         }
+        // 追加索引
+        // var pos = event.target.transaction.objectStore("patient");
+        // pos.createIndex("index_by_gender", "gender", { unique: false });
       };
       // 监听数据库升级阻塞事件，当数据库不可用或者不能用的时候触发的事件
       request.onblocked = event => {
@@ -122,6 +129,64 @@ var vm = new Vue({
         console.log(objectStore);
         let request = objectStore.getAll();
         request.onsuccess = event => {
+          const data = event.target.result;
+          if (data && data.length > 0) {
+            this.columns = Object.keys(data[0]);
+            this.data = data;
+          }
+        };
+        request.onerror = event => {};
+        transaction.commit();
+      }
+    },
+    searchFemaleAndLessThan80() {
+      if (db) {
+        let transaction = db.transaction(
+          this.currentObjectStoreName,
+          "readonly"
+        );
+        transaction.oncomplete = event => {
+          console.log(event);
+        };
+        transaction.onerror = event => {
+          console.error(event);
+        };
+        let objectStore = transaction.objectStore(this.currentObjectStoreName);
+        let index = objectStore.index("index_by_age_and_gender");
+        // var range = IDBKeyRange.only([10, "F"]);
+        console.log(indexedDB.cmp([30, "M"], [80, "F"]));
+        var range = IDBKeyRange.bound([0, "F"], [80, "F"], true, true);
+        let request = index.getAll(range);
+        request.onsuccess = event => {
+          console.log(event);
+          const data = event.target.result;
+          if (data && data.length > 0) {
+            this.columns = Object.keys(data[0]);
+            this.data = data;
+          }
+        };
+        request.onerror = event => {};
+        transaction.commit();
+      }
+    },
+    searchLessThan80() {
+      if (db) {
+        let transaction = db.transaction(
+          this.currentObjectStoreName,
+          "readonly"
+        );
+        transaction.oncomplete = event => {
+          console.log(event);
+        };
+        transaction.onerror = event => {
+          console.error(event);
+        };
+        let objectStore = transaction.objectStore(this.currentObjectStoreName);
+        let index = objectStore.index("index_by_age");
+        var range = IDBKeyRange.upperBound(80, true);
+        let request = index.getAll(range);
+        request.onsuccess = event => {
+          console.log(event);
           const data = event.target.result;
           if (data && data.length > 0) {
             this.columns = Object.keys(data[0]);
