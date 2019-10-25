@@ -175,7 +175,6 @@ var vm = new Vue({
           }
         };
         request.onerror = event => {};
-        transaction.commit();
       }
     },
     searchFemaleAndLessThan80() {
@@ -205,7 +204,6 @@ var vm = new Vue({
           }
         };
         request.onerror = event => {};
-        transaction.commit();
       }
     },
     searchLessThan30() {
@@ -233,7 +231,6 @@ var vm = new Vue({
           }
         };
         request.onerror = event => {};
-        transaction.commit();
       }
     },
     searchMale() {
