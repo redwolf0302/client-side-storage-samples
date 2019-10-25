@@ -26,7 +26,6 @@
                         {{calcStorageSize(storageEstimate.quota)}}
                         <button class="btn btn-info btn-sm" @click="loadEstimate">Refresh</button>
                     </p>
-                    <div><button class="btn btn-primary btn-sm" @click="importData">Import Data</button></div>
                 </div>
             </div>
             <div class="row mx-lg-n5">
@@ -34,7 +33,7 @@
                     <h4 v-if="currentDatabase">Database:{{currentDatabase.name}}(V{{currentDatabase.version}})</h4>
                     <h5>Object Stores</h5>
                     <div class="list-group">
-                        <a href="#" class="list-group-item list-group-item-action"
+                        <a class="list-group-item list-group-item-action"
                             v-bind:class="{'active':currentObjectStoreName===objectStoreName}"
                             v-for="objectStoreName in objectStoreNames"
                             @click="selectObjectStore(objectStoreName)">{{objectStoreName}}</a>
@@ -43,7 +42,8 @@
                 <div class="col-8">
                     <h4>Object Store: {{currentObjectStoreName}}</h4>
                     <button class="btn btn-success btn-sm" @click="searchFemaleAndLessThan80">查询80岁以下的女性</button>
-                    <button class="btn btn-success btn-sm" @click="searchLessThan80">查询80岁以下患者</button>
+                    <button class="btn btn-success btn-sm" @click="searchLessThan30">查询30岁以下患者</button>
+                    <button class="btn btn-success btn-sm" @click="searchMale">查询男性</button>
                     <div class="table-responsive">
                         <table class="table table-striped table-dark">
                             <thead>

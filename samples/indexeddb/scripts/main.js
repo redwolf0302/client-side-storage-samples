@@ -83,10 +83,50 @@ var vm = new Vue({
             multiEntry: false
           });
           os.createIndex("index_by_age", "age", { unique: false });
+          os.createIndex("index_by_gender", "gender", { unique: false });
+
+          os.transaction.oncomplete = event => {
+            // 初始化数据
+            let transaction = db.transaction("patient", "readwrite");
+            transaction.oncomplete = event => {
+              console.log("transaction ok", event);
+            };
+            transaction.onerror = event => {
+              console.log("transaction error", event);
+              this.showError(event.target.error.message);
+            };
+            let objectStore = transaction.objectStore("patient");
+            patients.forEach(patient => {
+              objectStore.add(patient);
+            });
+            transaction.commit();
+          };
         }
         // 追加索引
         // var pos = event.target.transaction.objectStore("patient");
         // pos.createIndex("index_by_gender", "gender", { unique: false });
+
+        if (!db.objectStoreNames.contains("message")) {
+          let os = db.createObjectStore("message", {
+            autoIncrement: true,
+            keyPath: "messageId"
+          });
+          os.transaction.oncomplete = event => {
+            // 初始化数据
+            let transaction = db.transaction("message", "readwrite");
+            transaction.oncomplete = event => {
+              console.log("transaction ok", event);
+            };
+            transaction.onerror = event => {
+              console.log("transaction error", event);
+              this.showError(event.target.error.message);
+            };
+            let objectStore = transaction.objectStore("message");
+            objectStore.add({ content: "Hello" });
+            objectStore.add({ content: "World" });
+            transaction.commit();
+          };
+        }
       };
       // 监听数据库升级阻塞事件，当数据库不可用或者不能用的时候触发的事件
       request.onblocked = event => {
@@ -169,7 +209,7 @@ var vm = new Vue({
         transaction.commit();
       }
     },
-    searchLessThan80() {
+    searchLessThan30() {
       if (db) {
         let transaction = db.transaction(
           this.currentObjectStoreName,
@@ -183,7 +223,7 @@ var vm = new Vue({
         };
         let objectStore = transaction.objectStore(this.currentObjectStoreName);
         let index = objectStore.index("index_by_age");
-        var range = IDBKeyRange.upperBound(80, true);
+        let range = IDBKeyRange.upperBound(30, true);
         let request = index.getAll(range);
         request.onsuccess = event => {
           console.log(event);
@@ -197,6 +237,34 @@ var vm = new Vue({
         transaction.commit();
       }
     },
+    searchMale() {
+      if (db) {
+        let transaction = db.transaction(
+          this.currentObjectStoreName,
+          "readonly"
+        );
+        transaction.oncomplete = event => {
+          console.log(event);
+        };
+        transaction.onerror = event => {
+          console.error(event);
+        };
+        let objectStore = transaction.objectStore(this.currentObjectStoreName);
+        let index = objectStore.index("index_by_gender");
+        let range = IDBKeyRange.only("M");
+        let request = index.openCursor(range, "next");
+        this.data = [];
+        request.onsuccess = event => {
+          let cursor = event.target.result;
+          this.data.push(cursor.value);
+          cursor.continue();
+        };
+        request.onerror = event => {
+          console.error("opencursor error", event);
+          this.showError(event.target.error.message);
+        };
+      }
+    },
     calcStorageSize(size) {
       if (size > GB) {
         return `${(size / GB).toFixed(4)}GB`;
@@ -206,23 +274,6 @@ var vm = new Vue({
         return `${(size / KB).toFixed(4)}KB`;
       } else {
         return `${size}KB`;
-      }
-    },
-    importData() {
-      if (db) {
-        let transaction = db.transaction("patient", "readwrite");
-        transaction.oncomplete = event => {
-          console.log("transaction ok", event);
-        };
-        transaction.onerror = event => {
-          console.log("transaction error", event);
-          this.showError(event.target.error.message);
-        };
-        let objectStore = transaction.objectStore("patient");
-        patients.forEach(patient => {
-          objectStore.add(patient);
-        });
-        transaction.commit();
       }
     },
     loadEstimate() {

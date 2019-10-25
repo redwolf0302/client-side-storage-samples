@@ -82,10 +82,10 @@ var vm = new Vue({
           }
         });
     },
-    searchLessThan80() {
+    searchLessThan30() {
       db.table(this.currentObjectStoreName)
         .where("age")
-        .below(80)
+        .below(30)
         .sortBy("patientId")
         .then(data => {
           if (data && data.length > 0) {
