@@ -252,8 +252,11 @@ var vm = new Vue({
         this.data = [];
         request.onsuccess = event => {
           let cursor = event.target.result;
-          this.data.push(cursor.value);
-          cursor.continue();
+          if(cursor){
+            console.log(cursor.key)
+            this.data.push(cursor.value);
+            cursor.continue();
+          }
         };
         request.onerror = event => {
           console.error("opencursor error", event);
