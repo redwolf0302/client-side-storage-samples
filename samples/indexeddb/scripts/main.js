@@ -7,7 +7,7 @@ const MB = 1024 * 1024;
 const GB = 1024 * 1024 * 1024;
 
 const DATABASE_NAME = "cs-storage-demo";
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 1;
 let db = null;
 var vm = new Vue({
   el: "#app",
@@ -85,7 +85,8 @@ var vm = new Vue({
           os.createIndex("index_by_age", "age", { unique: false });
           os.createIndex("index_by_gender", "gender", { unique: false });
 
-          os.transaction.oncomplete = event => {
+          os.transaction.addEventListener("complete", event => {
+            console.log("transaction ok", event);
             // 初始化数据
             let transaction = db.transaction("patient", "readwrite");
             transaction.oncomplete = event => {
@@ -97,21 +98,20 @@ var vm = new Vue({
             };
             let objectStore = transaction.objectStore("patient");
             patients.forEach(patient => {
-              objectStore.add(patient);
+              let request = objectStore.add(patient);
             });
-            transaction.commit();
-          };
+          });
         }
         // 追加索引
         // var pos = event.target.transaction.objectStore("patient");
-        // pos.createIndex("index_by_gender", "gender", { unique: false });
+        // pos.createIndex("index_by_patientName", "patientName", { unique: false });
 
         if (!db.objectStoreNames.contains("message")) {
           let os = db.createObjectStore("message", {
             autoIncrement: true,
             keyPath: "messageId"
           });
-          os.transaction.oncomplete = event => {
+          os.transaction.addEventListener("complete", event => {
             // 初始化数据
             let transaction = db.transaction("message", "readwrite");
             transaction.oncomplete = event => {
@@ -124,8 +124,7 @@ var vm = new Vue({
             let objectStore = transaction.objectStore("message");
             objectStore.add({ content: "Hello" });
             objectStore.add({ content: "World" });
-            transaction.commit();
-          };
+          });
         }
       };
       // 监听数据库升级阻塞事件，当数据库不可用或者不能用的时候触发的事件
